@@ -640,19 +640,63 @@
 
     <script>
     /* ================================================================
-       FUEL SURCHARGE CONFIGURATION
+       FUEL SURCHARGE CONFIGURATION — PER ORIGIN
        ================================================================
-       Update these values monthly. They are applied to base rates
-       to calculate the all-in rate: baseRate * (1 + fscPercent).
-       FSC percentages from Feb 2026 Fuel PDF.
+       Update these values monthly. Each origin (pickup ramp/port)
+       has its own FSC percentage from the monthly Fuel PDF.
+       The rate data in rates.json already stores the correct FSC
+       per lane — this config is used ONLY for the FSC reference
+       banner and for any future recalculation needs.
        ================================================================ */
     const FSC_CONFIG = {
-        "California":                     0.425,   // 42.5%
-        "Gulf Coast":                     0.285,   // 28.5%
-        "Lower Atlantic":                 0.310,   // 31.0%
-        "Midwest":                        0.310,   // 31.0%
-        "New England & Central Atlantic": 0.345,   // Blended NE 35.5% + CA 34%
-        "PNW Rocky Mountain":             0.290,   // 29.0% (Rocky Mountain base)
+        // California (single FSC for all CA origins)
+        "LA/LB Ports":                            0.45,    // 45.0%
+        "Oakland":                                0.45,    // 45.0%
+
+        // Gulf Coast
+        "Dallas UPRR":                            0.295,   // 29.5%
+        "Houston":                                0.295,   // 29.5%
+        "El Paso":                                0.295,   // 29.5%
+        "Mobile BNSF":                            0.295,   // 29.5%
+        "New Orleans":                            0.295,   // 29.5%
+        "San Antonio":                            0.295,   // 29.5%
+
+        // Lower Atlantic
+        "Savannah":                               0.325,   // 32.5%
+        "Charleston":                             0.325,   // 32.5%
+        "Norfolk":                                0.325,   // 32.5%
+        "Jacksonville":                           0.325,   // 32.5%
+        "Charlotte":                              0.325,   // 32.5%
+        "Atlanta":                                0.325,   // 32.5%
+
+        // Midwest
+        "INDIANAPOLIS, IN":                       0.32,    // 32.0%
+        "CHICAGO, IL":                            0.32,    // 32.0%
+        "COLUMBUS, OH":                           0.32,    // 32.0%
+        "DETROIT, MI":                            0.32,    // 32.0%
+        "KANSAS CITY, MO":                        0.32,    // 32.0%
+        "MEMPHIS, TN":                            0.32,    // 32.0%
+        "MINNEAPOLIS, MN":                        0.32,    // 32.0%
+        "ST LOUIS, MO":                           0.32,    // 32.0%
+        "CINCINNATI, OH":                         0.32,    // 32.0%
+        "LOUISVILLE, KY":                         0.32,    // 32.0%
+
+        // New England & Central Atlantic — FSC VARIES BY PICKUP
+        "BOSTON, MA":                              0.34,    // 34.0%
+        "Worcester, MA":                          0.335,   // 33.5%
+        "NEW YORK, NY":                           0.335,   // 33.5%
+        "PHILADELPHIA, PA":                       0.335,   // 33.5%
+        "BALTIMORE, MD":                          0.335,   // 33.5%
+        "PITTSBURGH, PA":                         0.335,   // 33.5%
+        "Buffalo, NY":                            0.335,   // 33.5%
+
+        // PNW Rocky Mountain — FSC VARIES BY PICKUP
+        "Denver - BNSF Denver / UP Denver":       0.325,   // 32.5%
+        "Denver - BNSF Hudson":                   0.325,   // 32.5%
+        "Salt Lake City":                         0.325,   // 32.5%
+        "Seattle WA":                             0.365,   // 36.5%  (some vendors 29.0%)
+        "Tacoma WA":                              0.365,   // 36.5%  (some vendors 29.0%)
+        "Portland OR":                            0.365,   // 36.5%
     };
 
     /* ================================================================
@@ -672,9 +716,9 @@
     async function init() {
         try {
             const [ratesResp, contactsResp, accResp] = await Promise.all([
-                fetch('data/rates.json'),
-                fetch('data/contacts.json'),
-                fetch('data/accessorials.json')
+                fetch('rates.json'),
+                fetch('contacts.json'),
+                fetch('accessorials.json')
             ]);
 
             if (!ratesResp.ok || !contactsResp.ok || !accResp.ok) {
@@ -742,9 +786,41 @@
 
     function renderFscBanner() {
         const banner = document.getElementById('fscBanner');
-        banner.innerHTML = Object.entries(FSC_CONFIG).map(([region, pct]) =>
-            `<div class="fsc-item">${region}: <span>${(pct * 100).toFixed(1)}%</span></div>`
-        ).join('');
+        // Group FSC_CONFIG entries by their percentage to show concisely
+        // Build region-level summary from rate data once loaded
+        const regionFsc = {};
+        for (const r of ratesData) {
+            if (!regionFsc[r.region]) regionFsc[r.region] = {};
+            const originKey = r.origin;
+            if (!regionFsc[r.region][originKey]) {
+                regionFsc[r.region][originKey] = new Set();
+            }
+            regionFsc[r.region][originKey].add(r.fscPercent);
+        }
+
+        let html = '';
+        for (const [region, origins] of Object.entries(regionFsc).sort((a,b) => a[0].localeCompare(b[0]))) {
+            const allPcts = new Set();
+            for (const pcts of Object.values(origins)) {
+                for (const p of pcts) allPcts.add(p);
+            }
+            if (allPcts.size === 1) {
+                const pct = [...allPcts][0];
+                html += `<div class="fsc-item">${region}: <span>${(pct * 100).toFixed(1)}%</span></div>`;
+            } else {
+                // Show per-origin breakdown
+                const parts = [];
+                for (const [origin, pcts] of Object.entries(origins).sort((a,b) => a[0].localeCompare(b[0]))) {
+                    const pctArr = [...pcts].sort();
+                    const pctStr = pctArr.map(p => (p * 100).toFixed(1) + '%').join('/');
+                    // Shorten origin name for banner
+                    const shortOrigin = origin.replace(/ - BNSF.*| - UP.*/, '').replace(/, [A-Z]{2}$/, '');
+                    parts.push(`${shortOrigin}: ${pctStr}`);
+                }
+                html += `<div class="fsc-item">${region} — <span>${parts.join(' | ')}</span></div>`;
+            }
+        }
+        banner.innerHTML = html;
     }
 
     function populateOrigins() {
@@ -1145,6 +1221,7 @@
         }
 
         const fees = acc.fees;
+        const comments = acc.comments || {};
         const feeLabels = {
             yardStorageFreeTime: 'Yard Storage Free Time (24hr periods)',
             yardStorageCost: 'Yard Storage Cost (per 24hr)',
@@ -1165,22 +1242,36 @@
             residentialDeliveryFee: 'Residential Delivery Fee',
         };
 
-        let html = '<table class="acc-table"><thead><tr><th>Charge</th><th>Rate / Terms</th></tr></thead><tbody>';
+        // Check if any comments exist to decide whether to show column
+        const hasAnyComments = Object.keys(comments).some(k =>
+            k in feeLabels || ['yardStorageFreeTime','yardStorageCost','warehouseWaitFreeTime','warehouseWaitFee'].includes(k)
+        );
+        const colSpan = hasAnyComments ? 3 : 2;
+
+        let html = `<table class="acc-table"><thead><tr><th>Charge</th><th>Rate / Terms</th>${hasAnyComments ? '<th>Comments</th>' : ''}</tr></thead><tbody>`;
+
+        function feeRow(key) {
+            const val = fees[key] ?? '-';
+            const comment = comments[key] || '';
+            return `<tr>
+                <td>${feeLabels[key]}</td>
+                <td><strong>${formatFeeValue(val)}</strong></td>
+                ${hasAnyComments ? `<td style="font-style:italic;color:var(--grey-500);font-size:0.9em;">${comment}</td>` : ''}
+            </tr>`;
+        }
 
         // Free Time section
-        html += '<tr class="section-label"><td colspan="2">Free Time</td></tr>';
+        html += `<tr class="section-label"><td colspan="${colSpan}">Free Time</td></tr>`;
         ['yardStorageFreeTime', 'yardStorageCost', 'warehouseWaitFreeTime', 'warehouseWaitFee'].forEach(key => {
-            const val = fees[key] ?? '-';
-            html += `<tr><td>${feeLabels[key]}</td><td><strong>${formatFeeValue(val)}</strong></td></tr>`;
+            html += feeRow(key);
         });
 
         // Fees section
-        html += '<tr class="section-label"><td colspan="2">Fees</td></tr>';
+        html += `<tr class="section-label"><td colspan="${colSpan}">Fees</td></tr>`;
         ['prePull', 'hazmatFee', 'reeferFee', 'chassisFee', 'chassisSplitFee', 'triaxleFee',
          'overweightFee', 'dryRunFee', 'stopOffFee', 'dropPickFee', 'layoverFee', 'bondedFee',
          'residentialDeliveryFee'].forEach(key => {
-            const val = fees[key] ?? '-';
-            html += `<tr><td>${feeLabels[key]}</td><td><strong>${formatFeeValue(val)}</strong></td></tr>`;
+            html += feeRow(key);
         });
 
         html += '</tbody></table>';
@@ -1235,6 +1326,7 @@
         }
 
         const gen = acc.general;
+        const comments = acc.comments || {};
         const capLabels = {
             tracking: 'Provides Tracking',
             trackingSystem: 'Tracking System',
@@ -1257,10 +1349,14 @@
         const html = '<div class="capabilities-grid">' +
             Object.entries(capLabels).map(([key, label]) => {
                 const val = gen[key] ?? '-';
+                const comment = comments[key] || '';
                 return `
-                    <div class="cap-item">
-                        <span class="cap-label">${label}</span>
-                        <span class="cap-value ${capClass(val)}">${val}</span>
+                    <div class="cap-item" style="flex-direction:column;align-items:flex-start;">
+                        <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
+                            <span class="cap-label">${label}</span>
+                            <span class="cap-value ${capClass(val)}">${val}</span>
+                        </div>
+                        ${comment ? `<div style="font-size:0.78em;font-style:italic;color:var(--grey-400);margin-top:4px;width:100%;">${comment}</div>` : ''}
                     </div>
                 `;
             }).join('') + '</div>';
