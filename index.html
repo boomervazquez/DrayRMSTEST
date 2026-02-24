@@ -640,64 +640,145 @@
 
     <script>
     /* ================================================================
-       FUEL SURCHARGE CONFIGURATION — PER ORIGIN
+       FUEL SURCHARGE CONFIGURATION
        ================================================================
-       Update these values monthly. Each origin (pickup ramp/port)
-       has its own FSC percentage from the monthly Fuel PDF.
-       The rate data in rates.json already stores the correct FSC
-       per lane — this config is used ONLY for the FSC reference
-       banner and for any future recalculation needs.
+       UPDATE THESE VALUES MONTHLY from the Fuel PDF.
+       Regions match the EIA fuel PDF breakdown exactly.
+       All displayed rates are recalculated automatically:
+           All-In Rate = Base Rate × (1 + FSC%)
        ================================================================ */
     const FSC_CONFIG = {
-        // California (single FSC for all CA origins)
-        "LA/LB Ports":                            0.1,    // 45.0%
-        "Oakland":                                0.1,    // 45.0%
-
-        // Gulf Coast
-        "Dallas UPRR":                            0.295,   // 29.5%
-        "Houston":                                0.295,   // 29.5%
-        "El Paso":                                0.295,   // 29.5%
-        "Mobile BNSF":                            0.295,   // 29.5%
-        "New Orleans":                            0.295,   // 29.5%
-        "San Antonio":                            0.295,   // 29.5%
-
-        // Lower Atlantic
-        "Savannah":                               0.325,   // 32.5%
-        "Charleston":                             0.325,   // 32.5%
-        "Norfolk":                                0.325,   // 32.5%
-        "Jacksonville":                           0.325,   // 32.5%
-        "Charlotte":                              0.325,   // 32.5%
-        "Atlanta":                                0.325,   // 32.5%
-
-        // Midwest
-        "INDIANAPOLIS, IN":                       0.32,    // 32.0%
-        "CHICAGO, IL":                            0.32,    // 32.0%
-        "COLUMBUS, OH":                           0.32,    // 32.0%
-        "DETROIT, MI":                            0.32,    // 32.0%
-        "KANSAS CITY, MO":                        0.32,    // 32.0%
-        "MEMPHIS, TN":                            0.32,    // 32.0%
-        "MINNEAPOLIS, MN":                        0.32,    // 32.0%
-        "ST LOUIS, MO":                           0.32,    // 32.0%
-        "CINCINNATI, OH":                         0.32,    // 32.0%
-        "LOUISVILLE, KY":                         0.32,    // 32.0%
-
-        // New England & Central Atlantic — FSC VARIES BY PICKUP
-        "BOSTON, MA":                              0.34,    // 34.0%
-        "Worcester, MA":                          0.335,   // 33.5%
-        "NEW YORK, NY":                           0.335,   // 33.5%
-        "PHILADELPHIA, PA":                       0.335,   // 33.5%
-        "BALTIMORE, MD":                          0.335,   // 33.5%
-        "PITTSBURGH, PA":                         0.335,   // 33.5%
-        "Buffalo, NY":                            0.335,   // 33.5%
-
-        // PNW Rocky Mountain — FSC VARIES BY PICKUP
-        "Denver - BNSF Denver / UP Denver":       0.325,   // 32.5%
-        "Denver - BNSF Hudson":                   0.325,   // 32.5%
-        "Salt Lake City":                         0.325,   // 32.5%
-        "Seattle WA":                             0.365,   // 36.5%  (some vendors 29.0%)
-        "Tacoma WA":                              0.365,   // 36.5%  (some vendors 29.0%)
-        "Portland OR":                            0.365,   // 36.5%
+        "New England":                  0.355,   // 35.5%  — ME, NH, VT, MA, CT, RI
+        "Central Atlantic":             0.340,   // 34.0%  — NY, PA, NJ, DE, MD
+        "Lower Atlantic":               0.310,   // 31.0%  — AR, WV, VA, NC, TN, SC, GA, FL
+        "Midwest":                      0.310,   // 31.0%  — OH, KY, MI, IN, IL, WI, MN, IA, MO, ND, SD, NE, KS, OK
+        "Gulf Coast":                   0.285,   // 28.5%  — AL, MS, LA, TX, NM
+        "Rocky Mountain":               0.290,   // 29.0%  — MT, ID, WY, UT, CO
+        "West Coast Less California":   0.345,   // 34.5%  — WA, OR, NV, AZ
+        "California":                   0.425,   // 42.5%  — CA
     };
+
+    /* ================================================================
+       ORIGIN → FUEL REGION MAPPING
+       ================================================================
+       Maps each pickup origin to the fuel region above.
+       When new origins appear in rate cards, add them here.
+       ================================================================ */
+    const ORIGIN_TO_FUEL_REGION = {
+        // California
+        "LA/LB Ports":                                          "California",
+        "OAKLAND, CA":                                          "California",
+
+        // Gulf Coast  (AL, MS, LA, TX, NM)
+        "Dallas BNSF":                                          "Gulf Coast",
+        "Dallas UPRR":                                          "Gulf Coast",
+        "El Paso/Santa Teresa, NM":                             "Gulf Coast",
+        "Houston, TX":                                          "Gulf Coast",
+        "MOBILE, AL":                                           "Gulf Coast",
+        "New Orleans, LA":                                      "Gulf Coast",
+
+        // Lower Atlantic  (AR, WV, VA, NC, TN, SC, GA, FL)
+        "Atlanta, GA - CSX & BNSF":                             "Lower Atlantic",
+        "Atlanta, GA - NS Austell":                             "Lower Atlantic",
+        "BNSF - Memphis (Shelby)":                              "Lower Atlantic",
+        "CHARLOTTE, NC":                                        "Lower Atlantic",
+        "CN - Intermodal Gateway Memphis":                      "Lower Atlantic",
+        "CSX - Memphis":                                        "Lower Atlantic",
+        "Charleston, SC":                                       "Lower Atlantic",
+        "GREER, SC":                                            "Lower Atlantic",
+        "JACKSONVILLE, FL":                                     "Lower Atlantic",
+        "MIAMI, FL":                                            "Lower Atlantic",
+        "NASHVILLE, TN":                                        "Lower Atlantic",
+        "NORFOLK, VA":                                          "Lower Atlantic",
+        "NS - Rossville,TN":                                    "Lower Atlantic",
+        "PORT EVERGLADES, FL":                                  "Lower Atlantic",
+        "SAVANNAH, GA":                                         "Lower Atlantic",
+        "TAMPA, FL":                                            "Lower Atlantic",
+        "UP - Marion, AR":                                      "Lower Atlantic",
+        "WILMINGTON, NC":                                       "Lower Atlantic",
+
+        // Midwest  (OH, KY, MI, IN, IL, WI, MN, IA, MO, ND, SD, NE, KS, OK)
+        "CHICAGO, IL  - UP JOLIET INTERMODAL TERMINAL GLOBAL 4 (I206)": "Midwest",
+        "CHICAGO, IL -  NORFOLK SOUTHERN - LANDERS (I104)":     "Midwest",
+        "CHICAGO, IL - BNSF - CHICAGO - LPC (H572)":           "Midwest",
+        "CHICAGO, IL - CN RAIL - CHICAGO - HARVEY (I092)":      "Midwest",
+        "CHICAGO, IL - CP RAIL - CHICAGO, BENSENVILLE (J830)":  "Midwest",
+        "CHICAGO, IL - CSX (J470)":                             "Midwest",
+        "CINCINNATI, OH":                                       "Midwest",
+        "CLEVELAND, OH":                                        "Midwest",
+        "COLUMBUS, OH":                                         "Midwest",
+        "DETROIT, MI":                                          "Midwest",
+        "INDIANAPOLIS, IN":                                     "Midwest",
+        "KANSAS CITY, KS - BNSF LOGISTICS PARK":               "Midwest",
+        "KANSAS CITY, KS - CPKC - Kansas City / CSX KANSAS CITY": "Midwest",
+        "KANSAS CITY, KS - NS VOLTZ / UP NEFF":                "Midwest",
+        "LOUISVILLE, KY":                                       "Midwest",
+        "MINNEAPOLIS, MN / ST. PAUL, MN":                      "Midwest",
+        "OMAHA, NE / COUNCIL BLUFFS, IA":                      "Midwest",
+        "ST.LOUIS, MO":                                         "Midwest",
+
+        // New England  (ME, NH, VT, MA, CT, RI)
+        "BOSTON, MA":                                            "New England",
+        "Worcester, MA":                                        "New England",
+
+        // Central Atlantic  (NY, PA, NJ, DE, MD)
+        "NEW YORK, NY":                                         "Central Atlantic",
+        "PHILADELPHIA, PA":                                     "Central Atlantic",
+        "BALTIMORE, MD":                                        "Central Atlantic",
+        "PITTSBURGH, PA":                                       "Central Atlantic",
+        "Buffalo, NY":                                          "Central Atlantic",
+
+        // Rocky Mountain  (MT, ID, WY, UT, CO)
+        "Denver - BNSF Denver / UP Denver":                     "Rocky Mountain",
+        "Denver - BNSF Hudson":                                 "Rocky Mountain",
+        "Salt Lake City":                                       "Rocky Mountain",
+
+        // West Coast Less California  (WA, OR, NV, AZ)
+        "Seattle WA":                                           "West Coast Less California",
+        "Tacoma WA":                                            "West Coast Less California",
+        "Portland OR":                                          "West Coast Less California",
+    };
+
+    /**
+     * Get the FSC percentage for a given origin.
+     * Looks up the origin in the mapping, then gets the FSC from config.
+     * Falls back to checking if the origin text contains a mapped key.
+     */
+    function getFscForOrigin(origin) {
+        // Direct match
+        if (ORIGIN_TO_FUEL_REGION[origin]) {
+            return FSC_CONFIG[ORIGIN_TO_FUEL_REGION[origin]] ?? 0;
+        }
+        // Partial match (for origins not exactly matching the map)
+        const originUpper = origin.toUpperCase();
+        for (const [mappedOrigin, fuelRegion] of Object.entries(ORIGIN_TO_FUEL_REGION)) {
+            if (originUpper.includes(mappedOrigin.toUpperCase()) ||
+                mappedOrigin.toUpperCase().includes(originUpper)) {
+                return FSC_CONFIG[fuelRegion] ?? 0;
+            }
+        }
+        // Last resort: try to match by the rate card's region name
+        return 0;
+    }
+
+    /**
+     * Recalculate FSC and all-in rate for a single rate record
+     * using the current FSC_CONFIG values.
+     */
+    function recalcRate(rate) {
+        const fsc = getFscForOrigin(rate.origin);
+        rate.fscPercent = fsc;
+        rate.baseAndFsc = rate.baseRate * (1 + fsc);
+        return rate;
+    }
+
+    /**
+     * Recalculate all rates using current FSC_CONFIG.
+     * Call this after loading data or after editing FSC_CONFIG.
+     */
+    function recalcAllRates() {
+        ratesData.forEach(recalcRate);
+    }
 
     /* ================================================================
        DATA
@@ -728,6 +809,9 @@
             ratesData = await ratesResp.json();
             contactsData = await contactsResp.json();
             accessorialsData = await accResp.json();
+
+            // Recalculate all rates using current FSC_CONFIG
+            recalcAllRates();
 
             // Populate stats
             const regions = new Set(ratesData.map(r => r.region));
@@ -786,41 +870,10 @@
 
     function renderFscBanner() {
         const banner = document.getElementById('fscBanner');
-        // Group FSC_CONFIG entries by their percentage to show concisely
-        // Build region-level summary from rate data once loaded
-        const regionFsc = {};
-        for (const r of ratesData) {
-            if (!regionFsc[r.region]) regionFsc[r.region] = {};
-            const originKey = r.origin;
-            if (!regionFsc[r.region][originKey]) {
-                regionFsc[r.region][originKey] = new Set();
-            }
-            regionFsc[r.region][originKey].add(r.fscPercent);
-        }
-
-        let html = '';
-        for (const [region, origins] of Object.entries(regionFsc).sort((a,b) => a[0].localeCompare(b[0]))) {
-            const allPcts = new Set();
-            for (const pcts of Object.values(origins)) {
-                for (const p of pcts) allPcts.add(p);
-            }
-            if (allPcts.size === 1) {
-                const pct = [...allPcts][0];
-                html += `<div class="fsc-item">${region}: <span>${(pct * 100).toFixed(1)}%</span></div>`;
-            } else {
-                // Show per-origin breakdown
-                const parts = [];
-                for (const [origin, pcts] of Object.entries(origins).sort((a,b) => a[0].localeCompare(b[0]))) {
-                    const pctArr = [...pcts].sort();
-                    const pctStr = pctArr.map(p => (p * 100).toFixed(1) + '%').join('/');
-                    // Shorten origin name for banner
-                    const shortOrigin = origin.replace(/ - BNSF.*| - UP.*/, '').replace(/, [A-Z]{2}$/, '');
-                    parts.push(`${shortOrigin}: ${pctStr}`);
-                }
-                html += `<div class="fsc-item">${region} — <span>${parts.join(' | ')}</span></div>`;
-            }
-        }
-        banner.innerHTML = html;
+        // Show FSC_CONFIG fuel regions directly — matches the monthly fuel PDF
+        banner.innerHTML = Object.entries(FSC_CONFIG).map(([region, pct]) =>
+            `<div class="fsc-item">${region}: <span>${(pct * 100).toFixed(1)}%</span></div>`
+        ).join('');
     }
 
     function populateOrigins() {
