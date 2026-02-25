@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>K-APEX Rate Management System</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <style>
         /* ============================================================
            K-APEX RMS - Orange/Grey Theme
@@ -518,6 +519,211 @@
             color: var(--grey-400);
         }
 
+        /* Procurement Rate Calculator */
+        #procurementSection {
+            padding: 30px 40px;
+            background: var(--grey-50);
+            border-top: 2px solid var(--grey-200);
+        }
+        .proc-header {
+            margin-bottom: 24px;
+        }
+        .proc-header h2 {
+            font-size: 1.3em;
+            color: var(--orange-primary);
+            margin-bottom: 8px;
+        }
+        .proc-header p {
+            font-size: 0.95em;
+            color: var(--grey-500);
+            margin: 0;
+        }
+        .proc-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+            margin-bottom: 24px;
+            background: var(--white);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--grey-200);
+        }
+        .proc-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .proc-form-group label {
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--grey-500);
+        }
+        .proc-form-group input,
+        .proc-form-group select {
+            padding: 10px 14px;
+            font-size: 0.95em;
+            border: 2px solid var(--grey-200);
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: var(--white);
+        }
+        .proc-form-group input:focus,
+        .proc-form-group select:focus {
+            border-color: var(--orange-primary);
+            box-shadow: 0 0 0 3px rgba(255,140,0,0.15);
+        }
+        #proc_location { width: 220px; }
+        #proc_override { width: 420px; min-width: 300px; }
+        .proc-status {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            background: var(--orange-light);
+            border: 2px solid var(--orange-primary);
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--grey-800);
+            font-size: 0.95em;
+        }
+        .proc-status.active { display: flex; }
+        .proc-spinner {
+            width: 20px; height: 20px;
+            border: 3px solid var(--grey-200);
+            border-top-color: var(--orange-primary);
+            border-radius: 50%;
+            animation: proc-spin 0.8s linear infinite;
+        }
+        @keyframes proc-spin { to { transform: rotate(360deg); } }
+        .proc-btn-group {
+            display: flex;
+            gap: 8px;
+        }
+        .proc-btn-group .btn {
+            padding: 10px 20px;
+            font-size: 0.95em;
+        }
+        .proc-result {
+            background: var(--white);
+            border: 1px solid var(--grey-200);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .proc-result-header {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--orange-primary);
+            margin-bottom: 16px;
+            border-bottom: 2px solid var(--grey-200);
+            padding-bottom: 12px;
+        }
+        .proc-result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--grey-100);
+        }
+        .proc-result-row:last-child {
+            border-bottom: none;
+        }
+        .proc-result-label {
+            font-weight: 600;
+            color: var(--grey-700);
+            min-width: 150px;
+        }
+        .proc-result-value {
+            text-align: right;
+            color: var(--grey-800);
+            font-weight: 500;
+        }
+        .proc-cost {
+            font-size: 1.3em;
+            color: var(--orange-primary);
+            font-weight: 700;
+        }
+        #proc_map {
+            height: 300px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid var(--grey-200);
+        }
+        .proc-accessorials {
+            background: var(--grey-50);
+            border: 1px solid var(--grey-200);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .proc-accessorials h3 {
+            font-size: 0.95em;
+            color: var(--orange-primary);
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        .proc-accessorial-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 0.9em;
+        }
+        .proc-accessorial-item:last-child {
+            border-bottom: none;
+        }
+        .proc-diagnostics {
+            background: var(--grey-50);
+            border: 1px solid var(--grey-200);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .proc-diag-header {
+            padding: 12px 16px;
+            background: var(--grey-200);
+            cursor: pointer;
+            user-select: none;
+            font-weight: 600;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .proc-diag-header:hover {
+            background: var(--grey-300);
+        }
+        .proc-diag-content {
+            padding: 16px;
+            display: none;
+            font-size: 0.85em;
+            color: var(--grey-600);
+            line-height: 1.6;
+        }
+        .proc-diag-content.show {
+            display: block;
+        }
+        .proc-disclaimer {
+            background: #fff3e0;
+            border-left: 4px solid var(--orange-primary);
+            padding: 16px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: var(--grey-700);
+            margin-top: 20px;
+        }
+        .proc-error {
+            color: var(--red);
+            font-weight: 500;
+            padding: 12px;
+            background: #f8d7da;
+            border-radius: 4px;
+            margin-bottom: 16px;
+        }
+
         /* Responsive */
         @media (max-width: 900px) {
             .header { flex-direction: column; text-align: center; gap: 12px; }
@@ -605,6 +811,92 @@
 
         <!-- Pagination -->
         <div class="pagination" id="pagination"></div>
+
+        <!-- Procurement Rate Calculator Section -->
+        <div id="procurementSection" style="display:none;">
+            <div class="proc-header">
+                <h2>No Contracted Rates Found</h2>
+                <p>Use the Rate Calculator below to estimate pricing based on driving distance:</p>
+            </div>
+
+            <!-- Calculator Form -->
+            <div class="proc-form">
+                <div class="proc-form-group">
+                    <label for="proc_location">City/State</label>
+                    <input type="text" id="proc_location" placeholder="e.g., Denver, CO">
+                </div>
+                <div class="proc-form-group">
+                    <label for="proc_override">Destination Override</label>
+                    <select id="proc_override">
+                        <option value="">Auto-select nearest</option>
+                    </select>
+                </div>
+                <div class="proc-btn-group">
+                    <button class="btn btn-primary" onclick="proc_calculateRate()">Calculate</button>
+                    <button class="btn btn-secondary" onclick="proc_resetForm()">Reset</button>
+                    <button class="btn btn-secondary" id="proc_copyBtn" onclick="proc_copySummary()" style="display:none;">Copy Summary</button>
+                </div>
+            </div>
+
+            <!-- Status Indicator -->
+            <div id="proc_status" class="proc-status">
+                <div class="proc-spinner"></div>
+                <span id="proc_statusText">Calculating...</span>
+            </div>
+
+            <!-- Error Display -->
+            <div id="proc_error" class="proc-error" style="display:none;"></div>
+
+            <!-- Results Section -->
+            <div id="proc_result" style="display:none;">
+                <div class="proc-result">
+                    <div class="proc-result-header">Rate Calculation Results</div>
+                    <div class="proc-result-row">
+                        <span class="proc-result-label">Facility</span>
+                        <span class="proc-result-value" id="proc_facility">-</span>
+                    </div>
+                    <div class="proc-result-row">
+                        <span class="proc-result-label">Type</span>
+                        <span class="proc-result-value" id="proc_type">-</span>
+                    </div>
+                    <div class="proc-result-row">
+                        <span class="proc-result-label">One-Way Miles</span>
+                        <span class="proc-result-value" id="proc_oneway">-</span>
+                    </div>
+                    <div class="proc-result-row">
+                        <span class="proc-result-label">Round-Trip Miles</span>
+                        <span class="proc-result-value" id="proc_roundtrip">-</span>
+                    </div>
+                    <div class="proc-result-row" style="padding-top: 16px; padding-bottom: 0;">
+                        <span class="proc-result-label" style="font-size: 1.15em;">Estimated Cost</span>
+                        <span class="proc-result-value proc-cost" id="proc_cost">-</span>
+                    </div>
+                </div>
+
+                <!-- Map -->
+                <div id="proc_map"></div>
+
+                <!-- Accessorial Charges -->
+                <div class="proc-accessorials">
+                    <h3>Typical Accessorial Charges (Reference)</h3>
+                    <div id="proc_accessorialsContent"></div>
+                </div>
+
+                <!-- Diagnostics -->
+                <div class="proc-diagnostics">
+                    <div class="proc-diag-header" onclick="proc_toggleDiagnostics()">
+                        <span>Diagnostics</span>
+                        <span id="proc_diagToggle">▼</span>
+                    </div>
+                    <div class="proc-diag-content" id="proc_diagContent"></div>
+                </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="proc-disclaimer">
+                <strong>Important Disclaimer:</strong> Rates displayed are estimates only. Actual pricing may vary based on capacity constraints and availability at the time of shipment. Please contact USA operations with any questions.
+            </div>
+        </div>
 
         <!-- Footer -->
         <div class="footer">
@@ -859,6 +1151,9 @@
             // Show welcome state
             document.getElementById('resultsBody').innerHTML = '';
 
+            // Initialize procurement rate calculator
+            proc_populateProcOverride();
+
         } catch (error) {
             console.error('Init error:', error);
             document.getElementById('resultsBody').innerHTML =
@@ -990,6 +1285,7 @@
         document.getElementById('resultsInfo').innerHTML =
             '<span>Enter a search term or select filters to find rates.</span><span></span>';
         document.getElementById('pagination').innerHTML = '';
+        document.getElementById('procurementSection').style.display = 'none';
     }
 
     /* ================================================================
@@ -1069,8 +1365,17 @@
             tbody.innerHTML = '';
             info.innerHTML = '<span>No rates found matching your criteria.</span><span></span>';
             pag.innerHTML = '';
+            document.getElementById('procurementSection').style.display = 'block';
+            // Pre-fill procurement location with search destination
+            const destInput = document.getElementById('searchDest').value.trim();
+            if (destInput) {
+                document.getElementById('proc_location').value = destInput;
+            }
             return;
         }
+
+        // Hide procurement section when results are found
+        document.getElementById('procurementSection').style.display = 'none';
 
         const totalPages = Math.ceil(filteredRates.length / PAGE_SIZE);
         if (currentPage > totalPages) currentPage = totalPages;
@@ -1418,9 +1723,538 @@
     }
 
     /* ================================================================
+       PROCUREMENT RATE CALCULATOR
+       ================================================================ */
+
+    // Destinations array
+    const PROC_DESTINATIONS = [
+        {name:"ATLANTA, GA - CSX & BNSF", type:"IPI", lat:33.545109, lon:-84.609939},
+        {name:"CHICAGO, IL - CN RAIL - CHICAGO - HARVEY (I092)", type:"IPI", lat:41.582582, lon:-87.646201},
+        {name:"MEMPHIS, TN - CN - INTERMODAL GATEWAY MEMPHIS", type:"IPI", lat:35.031884, lon:-90.151894},
+        {name:"MEMPHIS, TN - CSX - MEMPHIS", type:"IPI", lat:35.031884, lon:-90.151894},
+        {name:"CHICAGO, IL - CP RAIL - CHICAGO, BENSENVILLE (J830)", type:"IPI", lat:41.941386, lon:-87.894674},
+        {name:"CHICAGO, IL - BNSF - CHICAGO - LPC (H572)", type:"IPI", lat:41.393772, lon:-88.152065},
+        {name:"CHICAGO, IL  - UP JOLIET INTERMODAL TERMINAL GLOBAL 4 (I206)", type:"IPI", lat:41.458470, lon:-88.118630},
+        {name:"ATLANTA, GA - NS AUSTELL", type:"IPI", lat:33.822647, lon:-84.651274},
+        {name:"CHICAGO, IL -  NORFOLK SOUTHERN - LANDERS (I104)", type:"IPI", lat:41.756107, lon:-87.683117},
+        {name:"CHICAGO, IL - CSX (J470)", type:"IPI", lat:41.762825, lon:-87.799362},
+        {name:"MEMPHIS, TN - UP - MARION, AR", type:"IPI", lat:35.191874, lon:-90.257432},
+        {name:"HOUSTON, TX - HOUSTON PORT", type:"PORT", lat:29.673630, lon:-95.006670},
+        {name:"DETROIT, MI", type:"IPI", lat:42.316722, lon:-83.133398},
+        {name:"CINCINNATI, OH", type:"IPI", lat:39.121175, lon:-84.537791},
+        {name:"KANSAS CITY, KS - CPKC - KANSAS CITY / CSX KANSAS CITY", type:"IPI", lat:38.859078, lon:-94.559678},
+        {name:"MEMPHIS, TN - BNSF - MEMPHIS (SHELBY)", type:"IPI", lat:35.023622, lon:-89.900600},
+        {name:"NEW YORK, NY", type:"PORT", lat:40.668837, lon:-74.156747},
+        {name:"LA/LB, CA PORTS", type:"PORT", lat:33.782664, lon:-118.217784},
+        {name:"KANSAS CITY, KS - NS VOLTZ / UP NEFF", type:"IPI", lat:39.181953, lon:-94.427906},
+        {name:"MEMPHIS, TN - NS - ROSSVILLE,TN", type:"IPI", lat:35.005260, lon:-89.578705},
+        {name:"KANSAS CITY, KS - BNSF LOGISTICS PARK", type:"IPI", lat:38.767739, lon:-94.984948},
+        {name:"DALLAS UPRR", type:"IPI", lat:32.628501, lon:-96.680962},
+        {name:"COLUMBUS, OH", type:"IPI", lat:39.995573, lon:-82.828357},
+        {name:"LOUISVILLE, KY", type:"IPI", lat:38.114500, lon:-85.759700},
+        {name:"OMAHA, NE / COUNCIL BLUFFS, IA", type:"IPI", lat:41.216343, lon:-95.929840},
+        {name:"SAVANNAH, GA", type:"PORT", lat:32.127400, lon:-81.163200},
+        {name:"CHARLOTTE, NC", type:"IPI", lat:35.272334, lon:-80.908698},
+        {name:"DALLAS BNSF", type:"IPI", lat:32.964963, lon:-97.327672},
+        {name:"ST.LOUIS, MO", type:"IPI", lat:38.601750, lon:-90.315587},
+        {name:"NASHVILLE, TN", type:"IPI", lat:36.101542, lon:-86.756239},
+        {name:"NEW ORLEANS, LA", type:"IPI", lat:29.915698, lon:-90.101184},
+        {name:"WILMINGTON, NC", type:"PORT", lat:34.192767, lon:-77.945727},
+        {name:"NORFOLK, VA", type:"PORT", lat:36.872573, lon:-76.358894},
+        {name:"BALTIMORE, MD", type:"PORT", lat:39.258370, lon:-76.537550},
+        {name:"OAKLAND, CA", type:"PORT", lat:37.796856, lon:-122.304260},
+        {name:"CHARLESTON, SC", type:"PORT", lat:32.840553, lon:-79.953115},
+        {name:"BOSTON, MA", type:"PORT", lat:42.339765, lon:-71.035435},
+        {name:"SALT LAKE CITY, UT", type:"IPI", lat:40.771550, lon:-111.907986},
+        {name:"CLEVELAND, OH", type:"IPI", lat:41.563840, lon:-81.575457},
+        {name:"MOBILE, AL", type:"PORT", lat:30.666587, lon:-88.041873},
+        {name:"GREER, SC", type:"IPI", lat:34.930864, lon:-82.192319},
+        {name:"JACKSONVILLE, FL", type:"PORT", lat:30.394677, lon:-81.540770},
+        {name:"MINNEAPOLIS, MN / ST. PAUL, MN", type:"IPI", lat:44.968859, lon:-93.172196},
+        {name:"TAMPA, FL", type:"PORT", lat:27.919242, lon:-82.431773},
+        {name:"MIAMI, FL", type:"PORT", lat:25.771817, lon:-80.165674},
+        {name:"PORTLAND OR", type:"PORT", lat:45.638177, lon:-122.750626},
+        {name:"PORT EVERGLADES, FL", type:"PORT", lat:26.081660, lon:-80.120584},
+        {name:"SEATTLE WA", type:"PORT", lat:47.573856, lon:-122.348359},
+        {name:"TACOMA WA", type:"PORT", lat:47.266552, lon:-122.410226},
+        {name:"PITTSBURGH, PA", type:"IPI", lat:40.312725, lon:-79.900495},
+        {name:"DENVER - BNSF DENVER / UP DENVER", type:"IPI", lat:39.790500, lon:-104.994500},
+        {name:"DENVER - BNSF HUDSON", type:"IPI", lat:40.067600, lon:-104.628800},
+        {name:"INDIANAPOLIS, IN", type:"IPI", lat:39.746623, lon:-86.164181},
+        {name:"BUFFALO, NY", type:"IPI", lat:42.797787, lon:-78.834263},
+        {name:"PHILADELPHIA, PA", type:"PORT", lat:39.900862, lon:-75.116517},
+        {name:"WORCESTER, MA", type:"IPI", lat:42.224400, lon:-71.790708},
+        {name:"EL PASO/SANTA TERESA, NM", type:"IPI", lat:31.752711, lon:-106.493000}
+    ];
+
+    // RPM by location
+    const PROC_RPM_BY_LOCATION = {
+        "ATLANTA, GA - CSX & BNSF": 3.0,
+        "ATLANTA, GA - NS AUSTELL": 3.0,
+        "BALTIMORE, MD": 3.5,
+        "BOSTON, MA": 3.5,
+        "BUFFALO, NY": 5.0,
+        "CHARLESTON, SC": 3.0,
+        "CHARLOTTE, NC": 3.0,
+        "CHICAGO, IL  - UP JOLIET INTERMODAL TERMINAL GLOBAL 4 (I206)": 3.0,
+        "CHICAGO, IL -  NORFOLK SOUTHERN - LANDERS (I104)": 3.0,
+        "CHICAGO, IL - BNSF - CHICAGO - LPC (H572)": 3.0,
+        "CHICAGO, IL - CN RAIL - CHICAGO - HARVEY (I092)": 3.0,
+        "CHICAGO, IL - CP RAIL - CHICAGO, BENSENVILLE (J830)": 3.0,
+        "CHICAGO, IL - CSX (J470)": 3.0,
+        "CINCINNATI, OH": 3.0,
+        "CLEVELAND, OH": 3.0,
+        "COLUMBUS, OH": 3.0,
+        "DALLAS BNSF": 3.0,
+        "DALLAS UPRR": 3.0,
+        "DENVER - BNSF DENVER / UP DENVER": 5.0,
+        "DENVER - BNSF HUDSON": 5.0,
+        "DETROIT, MI": 3.0,
+        "EL PASO/SANTA TERESA, NM": 5.0,
+        "GREER, SC": 3.0,
+        "HOUSTON, TX - HOUSTON PORT": 3.0,
+        "INDIANAPOLIS, IN": 5.0,
+        "JACKSONVILLE, FL": 3.0,
+        "KANSAS CITY, KS - BNSF LOGISTICS PARK": 3.0,
+        "KANSAS CITY, KS - CPKC - KANSAS CITY / CSX KANSAS CITY": 3.0,
+        "KANSAS CITY, KS - NS VOLTZ / UP NEFF": 3.0,
+        "LA/LB, CA PORTS": 3.25,
+        "LOUISVILLE, KY": 3.0,
+        "MEMPHIS, TN - BNSF - MEMPHIS (SHELBY)": 3.0,
+        "MEMPHIS, TN - CN - INTERMODAL GATEWAY MEMPHIS": 3.0,
+        "MEMPHIS, TN - CSX - MEMPHIS": 3.0,
+        "MEMPHIS, TN - NS - ROSSVILLE,TN": 3.0,
+        "MEMPHIS, TN - UP - MARION, AR": 3.0,
+        "MIAMI, FL": 4.0,
+        "MINNEAPOLIS, MN / ST. PAUL, MN": 3.0,
+        "MOBILE, AL": 3.0,
+        "NASHVILLE, TN": 3.0,
+        "NEW ORLEANS, LA": 3.25,
+        "NEW YORK, NY": 4.0,
+        "NORFOLK, VA": 3.0,
+        "OAKLAND, CA": 3.5,
+        "OMAHA, NE / COUNCIL BLUFFS, IA": 3.0,
+        "PHILADELPHIA, PA": 5.0,
+        "PITTSBURGH, PA": 5.0,
+        "PORT EVERGLADES, FL": 5.0,
+        "PORTLAND OR": 3.5,
+        "SALT LAKE CITY, UT": 3.0,
+        "SAVANNAH, GA": 3.0,
+        "SEATTLE WA": 3.25,
+        "ST.LOUIS, MO": 3.0,
+        "TACOMA WA": 3.0,
+        "TAMPA, FL": 3.0,
+        "WILMINGTON, NC": 3.0,
+        "WORCESTER, MA": 5.0
+    };
+
+    let proc_map = null;
+    let proc_routeFeatures = null;
+    let proc_lastResult = null;
+
+    function proc_normName(s) {
+        if (!s) return '';
+        let t = String(s).toUpperCase().trim().replace(/\s+/g, ' ');
+        t = t.replace(/[.]/g, ' ').replace(/[^A-Z0-9,&\s\-]/g, '').replace(/\s{2,}/g, ' ').trim();
+        t = t.replace(/\bPORT OF\s+/g, '');
+        t = t.replace(/\bBNSF\b|\bUP\b|\bNS\b|\bCSX\b|\bCP\b|\bCN\b/g, '').replace(/\s{2,}/g,' ').trim();
+        const dash = t.indexOf(' - ');
+        if (dash > -1) t = t.slice(0, dash).trim();
+        t = t.replace(/,?\s+(TERMINAL|RAMP|RAIL|YARD|GATE|PORT|RDC)$/g, '').trim();
+        return t;
+    }
+
+    // Build normalized RPM lookup map
+    const PROC_RPM_NORM_MAP = (() => {
+        const out = {};
+        for (const k in PROC_RPM_BY_LOCATION) {
+            if (!Object.prototype.hasOwnProperty.call(PROC_RPM_BY_LOCATION, k)) continue;
+            const nk = proc_normName(k);
+            if (!(nk in out)) out[nk] = k;
+        }
+        return out;
+    })();
+
+    function proc_extractCityState(input) {
+        // Try "City, ST" format first
+        const match = input.match(/^([^,]+),\s*([A-Z]{2})\s*$/i);
+        if (match) return { city: match[1].trim(), state: match[2].toUpperCase() };
+        // If no comma, just treat as city name (user might enter just "Denver")
+        const trimmed = input.trim();
+        if (trimmed.length > 0) return { city: trimmed, state: '' };
+        return null;
+    }
+
+    function proc_getRpmFor(destName) {
+        // Exact match first
+        if (destName && PROC_RPM_BY_LOCATION.hasOwnProperty(destName)) {
+            return PROC_RPM_BY_LOCATION[destName];
+        }
+        // Normalized match
+        const norm = proc_normName(destName);
+        if (norm && PROC_RPM_NORM_MAP[norm]) {
+            return PROC_RPM_BY_LOCATION[PROC_RPM_NORM_MAP[norm]];
+        }
+        // Substring match
+        const up = String(destName || '').toUpperCase();
+        for (const k in PROC_RPM_BY_LOCATION) {
+            if (!PROC_RPM_BY_LOCATION.hasOwnProperty(k)) continue;
+            const uk = k.toUpperCase();
+            if (up.includes(uk) || uk.includes(up)) return PROC_RPM_BY_LOCATION[k];
+        }
+        return 3.0;
+    }
+
+    function proc_haversineMiles(lat1, lon1, lat2, lon2) {
+        const R = 3959;
+        const toRad = Math.PI / 180;
+        const dLat = (lat2 - lat1) * toRad;
+        const dLon = (lon2 - lon1) * toRad;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1*toRad) * Math.cos(lat2*toRad) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.asin(Math.sqrt(a));
+        return R * c;
+    }
+
+    async function proc_geocodeUS(city, state) {
+        try {
+            const cleanQuery = state ? `${city}, ${state}` : city;
+            const usBbox = '-125,24,-66,50';
+            const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(cleanQuery)}&limit=10&lang=en&bbox=${usBbox}`;
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+            const resp = await fetch(url, { method: 'GET', mode: 'cors', headers: { 'Accept': 'application/json' }, signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (!resp.ok) return null;
+            const data = await resp.json();
+            const features = data?.features || [];
+            if (features.length === 0) return null;
+            // Exclude business/POI types
+            const excludeKeys = ['shop', 'amenity', 'tourism', 'leisure', 'office', 'railway', 'highway', 'landuse', 'building'];
+            let usResults = features.filter(f => {
+                const props = f.properties || {};
+                const country = props.country || '';
+                const osmKey = props.osm_key || '';
+                const isUS = country === 'United States' || country === 'USA' || country === 'United States of America';
+                if (!isUS) return false;
+                if (excludeKeys.includes(osmKey)) return false;
+                return true;
+            });
+            // Prioritize by place type
+            let first = null;
+            if (usResults.length > 0) {
+                const typePriority = ['city', 'town', 'village', 'suburb', 'hamlet', 'locality', 'neighbourhood', 'district'];
+                for (const type of typePriority) {
+                    first = usResults.find(f => f.properties?.osm_value === type || f.properties?.type === type);
+                    if (first) break;
+                }
+                if (!first) first = usResults[0];
+            } else {
+                first = features[0];
+            }
+            const coords = first.geometry?.coordinates;
+            if (!coords || coords.length < 2) return null;
+            const props = first.properties || {};
+            const label = [props.name, props.state].filter(Boolean).join(', ') || cleanQuery;
+            return { lat: coords[1], lon: coords[0], label };
+        } catch (e) {
+            console.error('Geocode error:', e);
+            return null;
+        }
+    }
+
+    async function proc_osrmMiles(lat1, lon1, lat2, lon2) {
+        try {
+            const url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`;
+            const resp = await fetch(url);
+            if (!resp.ok) return null;
+            const data = await resp.json();
+            if (!data.routes || data.routes.length === 0) return null;
+            const route = data.routes[0];
+            const meters = route.distance;
+            const miles = meters / 1609.34;
+            const geom = route.geometry;
+            return {miles, geom};
+        } catch (e) {
+            console.error('OSRM error:', e);
+            return null;
+        }
+    }
+
+    function proc_populateProcOverride() {
+        const sel = document.getElementById('proc_override');
+        if (!sel) return;
+        sel.innerHTML = '';
+        const autoOpt = document.createElement('option');
+        autoOpt.value = '';
+        autoOpt.textContent = 'Auto-select nearest';
+        sel.appendChild(autoOpt);
+
+        const ports = PROC_DESTINATIONS.filter(d => d.type === 'PORT').sort((a,b) => a.name.localeCompare(b.name));
+        const ipis = PROC_DESTINATIONS.filter(d => d.type === 'IPI').sort((a,b) => a.name.localeCompare(b.name));
+
+        const portGroup = document.createElement('optgroup');
+        portGroup.label = 'Ocean Ports';
+        ports.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.name;
+            opt.textContent = d.name;
+            portGroup.appendChild(opt);
+        });
+        sel.appendChild(portGroup);
+
+        const ipiGroup = document.createElement('optgroup');
+        ipiGroup.label = 'IPI Rail Depots';
+        ipis.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.name;
+            opt.textContent = d.name;
+            ipiGroup.appendChild(opt);
+        });
+        sel.appendChild(ipiGroup);
+    }
+
+    function proc_locationAccessorials(destName) {
+        const base = [
+            'Prepull - $150',
+            'Yard Storage - $50/day',
+            'Chassis Rental - $50/day',
+            'Chassis Split - $150',
+            '2 Hours free at the Ramp then $80/Hr after',
+            '1 Hour free at warehouse then $100/Hr after',
+            'Overweight fee - $250',
+            'Tri Axle - $150/day',
+            'Reefer Fee - $200'
+        ];
+        // Location-specific extras
+        const raw = String(destName || '').toUpperCase();
+        if (raw.includes('OAKLAND, CA')) {
+            base.push('USOAK Extended Gate Fee - $55');
+        }
+        if (raw.includes('LA/LB, CA PORTS') || raw.includes('LOS ANGELES') || raw.includes('LONG BEACH')) {
+            base.push('Clean Truck Fee - $20');
+            base.push('Pierpass - $80');
+        }
+        return base;
+    }
+
+    function proc_renderProcResult(facility, type, oneway, roundtrip, cost, geom, custLat, custLon) {
+        proc_lastResult = {facility, type, oneway, roundtrip, cost, geom, custLat, custLon};
+        document.getElementById('proc_facility').textContent = facility;
+        document.getElementById('proc_type').textContent = type;
+        document.getElementById('proc_oneway').textContent = `${oneway.toFixed(1)} mi`;
+        document.getElementById('proc_roundtrip').textContent = `${roundtrip.toFixed(1)} mi`;
+        document.getElementById('proc_cost').textContent = `$${cost.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0})}`;
+        const acc = proc_locationAccessorials(facility);
+        const accHtml = acc.map(item =>
+            `<div class="proc-accessorial-item"><span>${item}</span></div>`
+        ).join('');
+        document.getElementById('proc_accessorialsContent').innerHTML = accHtml;
+        const diag = `
+            <div><strong>Geocoded Location:</strong> ${custLat.toFixed(4)}, ${custLon.toFixed(4)}</div>
+            <div><strong>Facility Lat/Lon:</strong> (check facility details)</div>
+            <div><strong>One-Way Distance (Driving):</strong> ${oneway.toFixed(1)} miles</div>
+            <div><strong>Round-Trip Distance:</strong> ${roundtrip.toFixed(1)} miles</div>
+            <div><strong>Rate/Mile:</strong> $${proc_getRpmFor(facility).toFixed(2)}/mile</div>
+            <div><strong>Base Cost (250 + RPM × RT):</strong> $${(250 + proc_getRpmFor(facility) * roundtrip).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0})}</div>
+            <div><strong>Final Cost (max 350 floor):</strong> $${cost.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0})}</div>
+        `;
+        document.getElementById('proc_diagContent').innerHTML = diag;
+        document.getElementById('proc_result').style.display = 'block';
+        document.getElementById('proc_copyBtn').style.display = 'inline-block';
+        if (geom && typeof L !== 'undefined') {
+            proc_drawMap(custLat, custLon, geom);
+        }
+    }
+
+    function proc_drawMap(custLat, custLon, geom) {
+        if (typeof L === 'undefined') return; // Leaflet not loaded yet
+        if (!proc_map) {
+            proc_map = L.map('proc_map').setView([custLat, custLon], 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap',
+                maxZoom: 19
+            }).addTo(proc_map);
+        } else {
+            proc_map.setView([custLat, custLon], 6);
+            if (proc_routeFeatures) {
+                proc_map.removeLayer(proc_routeFeatures);
+            }
+        }
+        if (geom && geom.coordinates && geom.coordinates.length > 0) {
+            const routeLinestring = L.geoJSON(geom, {
+                style: {color: '#FF8C00', weight: 3, opacity: 0.8}
+            }).addTo(proc_map);
+            proc_routeFeatures = routeLinestring;
+        }
+        L.circleMarker([custLat, custLon], {radius: 8, color: '#FF8C00', fill: true, fillColor: '#FF8C00', weight: 2}).addTo(proc_map);
+    }
+
+    function proc_setStatus(text) {
+        const statusDiv = document.getElementById('proc_status');
+        const statusText = document.getElementById('proc_statusText');
+        if (text) {
+            statusText.textContent = text;
+            statusDiv.classList.add('active');
+        } else {
+            statusDiv.classList.remove('active');
+        }
+    }
+
+    async function proc_calculateRate() {
+        const locInput = document.getElementById('proc_location').value.trim();
+        const overrideVal = document.getElementById('proc_override').value.trim();
+        const errDiv = document.getElementById('proc_error');
+        errDiv.style.display = 'none';
+        errDiv.textContent = '';
+        document.getElementById('proc_result').style.display = 'none';
+
+        if (!locInput) {
+            errDiv.textContent = 'Please enter a city and state (e.g., Denver, CO).';
+            errDiv.style.display = 'block';
+            return;
+        }
+
+        const cs = proc_extractCityState(locInput);
+        if (!cs) {
+            errDiv.textContent = 'Invalid format. Please enter as: City, ST (e.g., Denver, CO)';
+            errDiv.style.display = 'block';
+            return;
+        }
+
+        try {
+            // Step 1: Geocode
+            proc_setStatus('Geocoding location...');
+            const geoResult = await proc_geocodeUS(cs.city, cs.state);
+            if (!geoResult) {
+                proc_setStatus(null);
+                errDiv.textContent = `Unable to geocode "${locInput}". Please verify the city/state and try again.`;
+                errDiv.style.display = 'block';
+                return;
+            }
+
+            // NYC metro area detection (by name and coordinates)
+            const nycMetroNames = ['manhattan', 'brooklyn', 'queens', 'bronx', 'staten island',
+                                   'newark', 'jersey city', 'hoboken', 'elizabeth', 'bayonne',
+                                   'union city', 'west new york', 'weehawken', 'secaucus', 'kearny'];
+            const labelLower = (geoResult.label || '').toLowerCase();
+            const isNYCByName = nycMetroNames.some(b => labelLower.includes(b)) ||
+                                (labelLower.includes('new york') && labelLower.includes(', ny'));
+            const isNYCByCoords = geoResult.lat >= 40.45 && geoResult.lat <= 41.0 &&
+                                  geoResult.lon >= -74.35 && geoResult.lon <= -73.65;
+            if (isNYCByName || isNYCByCoords) {
+                proc_setStatus(null);
+                errDiv.textContent = 'NYC Metro area does not follow standard rate formulas. Please reach out to US.KApex.FCL.Trucking@KLN.COM';
+                errDiv.style.display = 'block';
+                return;
+            }
+
+            // Step 2: Find nearest facility
+            let selectedDest = null;
+            if (overrideVal) {
+                proc_setStatus('Using selected destination...');
+                selectedDest = PROC_DESTINATIONS.find(d => d.name === overrideVal);
+                if (!selectedDest) {
+                    proc_setStatus(null);
+                    errDiv.textContent = 'Selected destination not found.';
+                    errDiv.style.display = 'block';
+                    return;
+                }
+            } else {
+                proc_setStatus('Finding nearest facilities...');
+                const candidates = PROC_DESTINATIONS.map(d => ({
+                    dest: d,
+                    airMiles: proc_haversineMiles(geoResult.lat, geoResult.lon, d.lat, d.lon)
+                })).sort((a, b) => a.airMiles - b.airMiles).slice(0, 5);
+
+                proc_setStatus(`Routing to ${candidates.length} candidates...`);
+                let bestDist = Infinity;
+                let bestDest = null;
+                let routed = 0;
+                for (const {dest} of candidates) {
+                    routed++;
+                    proc_setStatus(`Routing candidate ${routed} of ${candidates.length}: ${dest.name.split(' - ')[0]}...`);
+                    const routeResult = await proc_osrmMiles(geoResult.lat, geoResult.lon, dest.lat, dest.lon);
+                    if (!routeResult) continue;
+                    if (routeResult.miles < bestDist) {
+                        bestDist = routeResult.miles;
+                        bestDest = dest;
+                    }
+                }
+                selectedDest = bestDest || candidates[0].dest;
+            }
+
+            // Step 3: Calculate final route
+            proc_setStatus(`Computing route to ${selectedDest.name.split(' - ')[0]}...`);
+            const routeData = await proc_osrmMiles(geoResult.lat, geoResult.lon, selectedDest.lat, selectedDest.lon);
+            if (!routeData) {
+                proc_setStatus(null);
+                errDiv.textContent = 'Unable to calculate driving distance. Please try again.';
+                errDiv.style.display = 'block';
+                return;
+            }
+
+            let oneway = routeData.miles;
+            let roundtrip = oneway * 2;
+
+            if (roundtrip > 800) {
+                proc_setStatus(null);
+                errDiv.textContent = 'Distance is too large (round-trip > 800 mi). Please choose an alternate routing or reach out to US.KApex.FCL.Trucking@KLN.COM';
+                errDiv.style.display = 'block';
+                proc_renderProcResult(selectedDest.name, selectedDest.type, oneway, roundtrip, 0, routeData.geom, geoResult.lat, geoResult.lon);
+                document.getElementById('proc_cost').textContent = 'Over 800mi RT — Contact Operations';
+                return;
+            }
+
+            const rpm = proc_getRpmFor(selectedDest.name);
+            const calculated = 250 + rpm * roundtrip;
+            const cost = Math.max(350, calculated);
+
+            proc_setStatus(null);
+            proc_renderProcResult(selectedDest.name, selectedDest.type, oneway, roundtrip, cost, routeData.geom, geoResult.lat, geoResult.lon);
+
+        } catch (e) {
+            proc_setStatus(null);
+            errDiv.textContent = `Error: ${e.message || 'Something went wrong. Please try again.'}`;
+            errDiv.style.display = 'block';
+            console.error('Procurement calc error:', e);
+        }
+    }
+
+    function proc_resetForm() {
+        document.getElementById('proc_location').value = '';
+        document.getElementById('proc_override').value = '';
+        document.getElementById('proc_result').style.display = 'none';
+        document.getElementById('proc_error').style.display = 'none';
+        document.getElementById('proc_copyBtn').style.display = 'none';
+        proc_setStatus(null);
+        if (proc_map) {
+            proc_map.remove();
+            proc_map = null;
+        }
+    }
+
+    function proc_copySummary() {
+        if (!proc_lastResult) return;
+        const {facility, type, oneway, roundtrip, cost} = proc_lastResult;
+        const summary = `Facility: ${facility}\nType: ${type}\nOne-Way Miles: ${oneway.toFixed(1)}\nRound-Trip Miles: ${roundtrip.toFixed(1)}\nEstimated Cost: $${cost.toLocaleString('en-US')}`;
+        navigator.clipboard.writeText(summary).then(() => {
+            alert('Summary copied to clipboard!');
+        });
+    }
+
+    function proc_toggleDiagnostics() {
+        const content = document.getElementById('proc_diagContent');
+        const toggle = document.getElementById('proc_diagToggle');
+        content.classList.toggle('show');
+        toggle.textContent = content.classList.contains('show') ? '▲' : '▼';
+    }
+
+    /* ================================================================
        INIT
        ================================================================ */
     window.addEventListener('DOMContentLoaded', init);
     </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </body>
 </html>
