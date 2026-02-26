@@ -724,6 +724,418 @@
             margin-bottom: 16px;
         }
 
+        /* ============================================================
+           COMPARE FEATURE
+           ============================================================ */
+
+        /* Compare checkbox in table */
+        .compare-cb-cell {
+            text-align: center;
+            width: 50px;
+        }
+        .compare-cb-cell input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--orange-primary);
+            cursor: pointer;
+        }
+        .compare-cb-cell input[type="checkbox"]:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        th.compare-th {
+            width: 50px;
+            text-align: center;
+            cursor: default !important;
+        }
+        th.compare-th:hover {
+            background: linear-gradient(135deg, var(--grey-700) 0%, var(--grey-800) 100%) !important;
+        }
+
+        /* Floating Action Button */
+        .compare-fab {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 1050;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--orange-primary) 0%, var(--orange-hover) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 50px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 24px rgba(255,140,0,0.4);
+            transition: all 0.25s;
+        }
+        .compare-fab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 32px rgba(255,140,0,0.5);
+        }
+        .compare-fab.visible { display: flex; }
+        .compare-fab .fab-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            background: var(--white);
+            color: var(--orange-primary);
+            border-radius: 50%;
+            font-size: 0.85em;
+            font-weight: 800;
+        }
+
+        /* Compare Panel Overlay */
+        .compare-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 1100;
+        }
+        .compare-overlay.active { display: block; }
+
+        /* Compare Side Panel */
+        .compare-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 560px;
+            height: 100%;
+            background: var(--white);
+            z-index: 1200;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -8px 0 30px rgba(0,0,0,0.2);
+        }
+        .compare-panel.active { transform: translateX(0); }
+
+        .compare-panel-header {
+            background: linear-gradient(135deg, var(--grey-800) 0%, var(--grey-900) 100%);
+            color: var(--white);
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .compare-panel-header h2 {
+            font-size: 1.15em;
+            margin: 0;
+        }
+        .compare-panel-header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .compare-panel-header .btn-clear {
+            padding: 6px 14px;
+            font-size: 0.8em;
+            background: rgba(255,255,255,0.15);
+            color: var(--white);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .compare-panel-header .btn-clear:hover { background: rgba(255,255,255,0.25); }
+        .compare-panel-close {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: var(--white);
+            font-size: 1.4em;
+            cursor: pointer;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .compare-panel-close:hover { background: rgba(255,255,255,0.3); }
+
+        .compare-panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+        }
+
+        /* Vendor Cards */
+        .compare-vendors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .compare-vendor-card {
+            flex: 1;
+            min-width: 120px;
+            background: var(--grey-50);
+            border-radius: 10px;
+            padding: 12px 14px;
+            border-left: 4px solid var(--orange-primary);
+            position: relative;
+        }
+        .compare-vendor-card .cv-supplier {
+            font-weight: 700;
+            font-size: 0.85em;
+            color: var(--grey-800);
+            margin-bottom: 2px;
+            padding-right: 24px;
+            word-break: break-word;
+        }
+        .compare-vendor-card .cv-lane {
+            font-size: 0.75em;
+            color: var(--grey-500);
+            margin-bottom: 6px;
+        }
+        .compare-vendor-card .cv-rate {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--orange-primary);
+        }
+        .compare-vendor-card .cv-rate-label {
+            font-size: 0.7em;
+            color: var(--grey-500);
+            text-transform: uppercase;
+        }
+        .compare-vendor-card .cv-remove {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: var(--grey-400);
+            font-size: 1.1em;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+        .compare-vendor-card .cv-remove:hover { color: var(--red); }
+
+        /* Vendor color coding (up to 4) */
+        .compare-vendor-card:nth-child(1) { border-left-color: var(--orange-primary); }
+        .compare-vendor-card:nth-child(2) { border-left-color: #2196F3; }
+        .compare-vendor-card:nth-child(3) { border-left-color: #9C27B0; }
+        .compare-vendor-card:nth-child(4) { border-left-color: #4CAF50; }
+
+        /* Accessorial Grid */
+        .compare-acc-section h3 {
+            font-size: 0.9em;
+            color: var(--grey-700);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--grey-200);
+        }
+        .compare-acc-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82em;
+            margin-bottom: 16px;
+        }
+        .compare-acc-table th {
+            background: var(--grey-700);
+            color: var(--white);
+            padding: 8px 10px;
+            text-align: left;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            cursor: default;
+            white-space: nowrap;
+        }
+        .compare-acc-table th:hover { background: var(--grey-700); }
+        .compare-acc-table th.vendor-col-header {
+            max-width: 90px;
+            white-space: normal;
+            word-break: break-word;
+            text-align: center;
+        }
+        .compare-acc-table td {
+            padding: 7px 10px;
+            border-bottom: 1px solid var(--grey-100);
+            vertical-align: middle;
+        }
+        .compare-acc-table tr:hover { background: var(--grey-50); }
+        .compare-acc-table tr.checked-row { background: var(--orange-light); }
+        .compare-acc-table tr.section-label td {
+            background: var(--grey-100);
+            font-weight: 700;
+            color: var(--grey-700);
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+        }
+        .compare-acc-table .fee-cb {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--orange-primary);
+            cursor: pointer;
+        }
+        .compare-acc-table .fee-label-cell {
+            font-weight: 600;
+            color: var(--grey-700);
+            white-space: nowrap;
+        }
+        .compare-acc-table .vendor-val-cell {
+            text-align: center;
+            min-width: 80px;
+        }
+        .compare-acc-table .vendor-val-cell .fee-amount {
+            font-weight: 600;
+            color: var(--grey-800);
+        }
+        .compare-acc-table .vendor-val-cell .fee-variable {
+            font-size: 0.85em;
+            color: var(--grey-400);
+            font-style: italic;
+        }
+        .compare-acc-table .vendor-val-cell input[type="number"] {
+            width: 80px;
+            padding: 4px 6px;
+            border: 1px solid var(--grey-300);
+            border-radius: 4px;
+            font-size: 0.95em;
+            text-align: right;
+            outline: none;
+        }
+        .compare-acc-table .vendor-val-cell input[type="number"]:focus {
+            border-color: var(--orange-primary);
+            box-shadow: 0 0 0 2px rgba(255,140,0,0.15);
+        }
+        .compare-acc-table .vendor-val-cell .fee-na {
+            color: var(--grey-300);
+            font-size: 0.9em;
+        }
+
+        /* Custom charge row */
+        .compare-add-custom {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .compare-add-custom button {
+            padding: 6px 14px;
+            font-size: 0.82em;
+            background: var(--grey-100);
+            border: 1px dashed var(--grey-300);
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--grey-600);
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .compare-add-custom button:hover {
+            background: var(--orange-light);
+            border-color: var(--orange-primary);
+            color: var(--orange-primary);
+        }
+        .custom-label-input {
+            width: 130px;
+            padding: 4px 8px;
+            border: 1px solid var(--grey-300);
+            border-radius: 4px;
+            font-size: 0.9em;
+            outline: none;
+        }
+        .custom-label-input:focus {
+            border-color: var(--orange-primary);
+        }
+
+        /* Totals */
+        .compare-totals {
+            background: var(--grey-50);
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 8px;
+        }
+        .compare-totals h3 {
+            font-size: 0.9em;
+            color: var(--grey-700);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+        }
+        .compare-totals-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .compare-total-card {
+            flex: 1;
+            min-width: 110px;
+            background: var(--white);
+            border-radius: 8px;
+            padding: 14px;
+            text-align: center;
+            border: 2px solid var(--grey-200);
+            transition: border-color 0.2s;
+        }
+        .compare-total-card.best { border-color: #4CAF50; background: #f1f8e9; }
+        .compare-total-card.worst { border-color: var(--red); background: #fce4ec; }
+        .compare-total-card .ct-vendor {
+            font-size: 0.78em;
+            font-weight: 700;
+            color: var(--grey-600);
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+        .compare-total-card .ct-base {
+            font-size: 0.75em;
+            color: var(--grey-400);
+            margin-bottom: 2px;
+        }
+        .compare-total-card .ct-acc {
+            font-size: 0.75em;
+            color: var(--grey-400);
+            margin-bottom: 6px;
+        }
+        .compare-total-card .ct-total {
+            font-size: 1.35em;
+            font-weight: 800;
+            color: var(--grey-800);
+        }
+        .compare-total-card.best .ct-total { color: #2e7d32; }
+        .compare-total-card.worst .ct-total { color: var(--red); }
+        .compare-total-card .ct-diff {
+            font-size: 0.75em;
+            color: var(--grey-400);
+            margin-top: 4px;
+        }
+        .compare-total-card.best .ct-diff { color: #2e7d32; font-weight: 600; }
+        .compare-total-card.worst .ct-diff { color: var(--red); }
+
+        .compare-disclaimer {
+            margin-top: 16px;
+            padding: 12px;
+            background: #fff3e0;
+            border-left: 3px solid var(--orange-primary);
+            border-radius: 4px;
+            font-size: 0.78em;
+            color: var(--grey-600);
+        }
+
+        .compare-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--grey-400);
+        }
+        .compare-empty p { margin-bottom: 8px; }
+
         /* Responsive */
         @media (max-width: 900px) {
             .header { flex-direction: column; text-align: center; gap: 12px; }
@@ -732,6 +1144,8 @@
             .filter-group { width: 100%; }
             .results-section { padding: 0 8px 16px; }
             .modal-body { padding: 16px; }
+            .compare-panel { width: 100%; }
+            .compare-fab { bottom: 16px; right: 16px; }
         }
     </style>
 </head>
@@ -794,6 +1208,7 @@
             <table id="resultsTable">
                 <thead>
                     <tr>
+                        <th class="compare-th"><span style="font-size:0.9em;">&#9745;</span></th>
                         <th data-col="region" onclick="sortBy('region')">Region <span class="sort-arrow">&#9650;</span></th>
                         <th data-col="origin" onclick="sortBy('origin')">Origin <span class="sort-arrow">&#9650;</span></th>
                         <th data-col="destinationCity" onclick="sortBy('destinationCity')">Destination <span class="sort-arrow">&#9650;</span></th>
@@ -927,6 +1342,28 @@
                 <div class="modal-panel" id="panel-contacts"></div>
                 <div class="modal-panel" id="panel-capabilities"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- Compare FAB Button -->
+    <button class="compare-fab" id="compareFab" onclick="openComparePanel()">
+        Compare <span class="fab-badge" id="compareFabBadge">0</span>
+    </button>
+
+    <!-- Compare Overlay -->
+    <div class="compare-overlay" id="compareOverlay" onclick="closeComparePanel()"></div>
+
+    <!-- Compare Side Panel -->
+    <div class="compare-panel" id="comparePanel">
+        <div class="compare-panel-header">
+            <h2>Rate Comparison</h2>
+            <div class="compare-panel-header-actions">
+                <button class="btn-clear" onclick="clearCompare()">Clear All</button>
+                <button class="compare-panel-close" onclick="closeComparePanel()">&times;</button>
+            </div>
+        </div>
+        <div class="compare-panel-body" id="comparePanelBody">
+            <!-- Populated dynamically -->
         </div>
     </div>
 
@@ -1083,15 +1520,20 @@
     let currentPage = 1;
     const PAGE_SIZE = 100;
 
+    // Compare feature state
+    let compareList = [];       // Array of rate objects added to comparison
+    const MAX_COMPARE = 4;
+    let customChargeCounter = 0; // Counter for custom charge rows
+
     /* ================================================================
        INITIALIZATION
        ================================================================ */
     async function init() {
         try {
             const [ratesResp, contactsResp, accResp] = await Promise.all([
-                fetch('rates.json'),
-                fetch('contacts.json'),
-                fetch('accessorials.json')
+                fetch('https://raw.githubusercontent.com/boomervazquez/DrayRMSTEST/main/rates.json'),
+                fetch('https://raw.githubusercontent.com/boomervazquez/DrayRMSTEST/main/contacts.json'),
+                fetch('https://raw.githubusercontent.com/boomervazquez/DrayRMSTEST/main/accessorials.json')
             ]);
 
             if (!ratesResp.ok || !contactsResp.ok || !accResp.ok) {
@@ -1157,7 +1599,7 @@
         } catch (error) {
             console.error('Init error:', error);
             document.getElementById('resultsBody').innerHTML =
-                `<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--red);">
+                `<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--red);">
                     Error loading data: ${error.message}
                 </td></tr>`;
         }
@@ -1388,8 +1830,17 @@
             <span>Sorted by ${currentSort.col} (${currentSort.dir})</span>
         `;
 
-        tbody.innerHTML = pageRates.map((r, idx) => `
-            <tr onclick="openModal(${start + idx})">
+        tbody.innerHTML = pageRates.map((r, idx) => {
+            const globalIdx = start + idx;
+            const isInCompare = isRateInCompare(filteredRates[globalIdx]);
+            const compareFull = compareList.length >= MAX_COMPARE && !isInCompare;
+            return `
+            <tr onclick="openModal(${globalIdx})">
+                <td class="compare-cb-cell" onclick="event.stopPropagation()">
+                    <input type="checkbox" ${isInCompare ? 'checked' : ''} ${compareFull ? 'disabled title="Maximum ' + MAX_COMPARE + ' vendors for comparison"' : ''}
+                        onchange="toggleCompare(${globalIdx})"
+                    >
+                </td>
                 <td><span class="region-badge">${r.region}</span></td>
                 <td>${r.origin}</td>
                 <td>${r.destinationCity}</td>
@@ -1399,8 +1850,8 @@
                 <td class="rate-cell" style="color:var(--orange-primary)">${formatCurrency(r.baseAndFsc)}</td>
                 <td>${yesNoTag(r.freeDropPick)}</td>
                 <td>${yesNoTag(r.layoverFee)}</td>
-            </tr>
-        `).join('');
+            </tr>`;
+        }).join('');
 
         // Pagination
         pag.innerHTML = `
@@ -2167,17 +2618,19 @@
                     airMiles: proc_haversineMiles(geoResult.lat, geoResult.lon, d.lat, d.lon)
                 })).sort((a, b) => a.airMiles - b.airMiles).slice(0, 5);
 
-                proc_setStatus(`Routing to ${candidates.length} candidates...`);
+                proc_setStatus(`Routing to ${candidates.length} candidates in parallel...`);
+                const routePromises = candidates.map(({dest}) =>
+                    proc_osrmMiles(geoResult.lat, geoResult.lon, dest.lat, dest.lon)
+                        .then(result => ({dest, result}))
+                );
+                const routeResults = await Promise.all(routePromises);
+
                 let bestDist = Infinity;
                 let bestDest = null;
-                let routed = 0;
-                for (const {dest} of candidates) {
-                    routed++;
-                    proc_setStatus(`Routing candidate ${routed} of ${candidates.length}: ${dest.name.split(' - ')[0]}...`);
-                    const routeResult = await proc_osrmMiles(geoResult.lat, geoResult.lon, dest.lat, dest.lon);
-                    if (!routeResult) continue;
-                    if (routeResult.miles < bestDist) {
-                        bestDist = routeResult.miles;
+                for (const {dest, result} of routeResults) {
+                    if (!result) continue;
+                    if (result.miles < bestDist) {
+                        bestDist = result.miles;
                         bestDest = dest;
                     }
                 }
@@ -2249,6 +2702,368 @@
         content.classList.toggle('show');
         toggle.textContent = content.classList.contains('show') ? '▲' : '▼';
     }
+
+    /* ================================================================
+       RATE COMPARISON FEATURE
+       ================================================================ */
+
+    /**
+     * Unique key for a rate to identify it in the compare list.
+     * Uses supplier + origin + destination + baseRate to handle
+     * same vendor with different lanes.
+     */
+    function rateCompareKey(rate) {
+        return `${rate.supplier}|${rate.origin}|${rate.destinationCity}|${rate.baseRate}`;
+    }
+
+    function isRateInCompare(rate) {
+        const key = rateCompareKey(rate);
+        return compareList.some(r => rateCompareKey(r) === key);
+    }
+
+    function toggleCompare(filteredIdx) {
+        const rate = filteredRates[filteredIdx];
+        if (!rate) return;
+
+        const key = rateCompareKey(rate);
+        const existIdx = compareList.findIndex(r => rateCompareKey(r) === key);
+
+        if (existIdx > -1) {
+            compareList.splice(existIdx, 1);
+        } else {
+            if (compareList.length >= MAX_COMPARE) return;
+            compareList.push({ ...rate }); // Clone to avoid mutation
+        }
+
+        updateCompareFab();
+        renderResults(); // Re-render to update checkbox states
+
+        // If panel is open, refresh it
+        if (document.getElementById('comparePanel').classList.contains('active')) {
+            renderComparePanel();
+        }
+    }
+
+    function updateCompareFab() {
+        const fab = document.getElementById('compareFab');
+        const badge = document.getElementById('compareFabBadge');
+        if (compareList.length > 0) {
+            fab.classList.add('visible');
+            badge.textContent = compareList.length;
+        } else {
+            fab.classList.remove('visible');
+        }
+    }
+
+    function openComparePanel() {
+        if (compareList.length === 0) return;
+        document.getElementById('compareOverlay').classList.add('active');
+        document.getElementById('comparePanel').classList.add('active');
+        renderComparePanel();
+    }
+
+    function closeComparePanel() {
+        document.getElementById('compareOverlay').classList.remove('active');
+        document.getElementById('comparePanel').classList.remove('active');
+    }
+
+    function clearCompare() {
+        compareList = [];
+        customChargeCounter = 0;
+        updateCompareFab();
+        closeComparePanel();
+        renderResults();
+    }
+
+    function removeFromCompare(idx) {
+        compareList.splice(idx, 1);
+        updateCompareFab();
+        if (compareList.length === 0) {
+            closeComparePanel();
+        } else {
+            renderComparePanel();
+        }
+        renderResults();
+    }
+
+    /**
+     * Parse a fee string into a numeric amount or flag as variable.
+     * Returns { numeric: true, amount: 150 } or { numeric: false, text: "dependent on location" }
+     */
+    function parseFeeAmount(val) {
+        if (!val || val === '-' || val === 'None' || val === 'N/A') {
+            return { numeric: false, text: '' };
+        }
+        const str = String(val).trim();
+        // Try to extract a dollar amount from strings like "$150", "$75/HR", "$40/day"
+        const match = str.match(/^\$?\s*([\d,]+(?:\.\d+)?)/);
+        if (match) {
+            const num = parseFloat(match[1].replace(/,/g, ''));
+            if (!isNaN(num)) return { numeric: true, amount: num };
+        }
+        // Check for pure numbers
+        const num = parseFloat(str.replace(/[^0-9.-]/g, ''));
+        if (!isNaN(num) && str.match(/^[\$\s]*[\d,.]+\s*$/)) {
+            return { numeric: true, amount: num };
+        }
+        return { numeric: false, text: str };
+    }
+
+    /**
+     * Build the complete comparison panel content.
+     */
+    function renderComparePanel() {
+        const body = document.getElementById('comparePanelBody');
+
+        if (compareList.length === 0) {
+            body.innerHTML = '<div class="compare-empty"><p>No vendors selected for comparison.</p><p style="font-size:0.85em;">Use the checkboxes in the results table to add vendors.</p></div>';
+            return;
+        }
+
+        // Look up accessorial data for each vendor
+        const vendorAccData = compareList.map(r => findAccessorial(r.supplier, r.region));
+
+        // Vendor Cards
+        let html = '<div class="compare-vendors">';
+        compareList.forEach((r, i) => {
+            html += `
+                <div class="compare-vendor-card">
+                    <button class="cv-remove" onclick="removeFromCompare(${i})" title="Remove">&times;</button>
+                    <div class="cv-supplier">${r.supplier}</div>
+                    <div class="cv-lane">${r.origin} &rarr; ${r.destinationCity}</div>
+                    <div class="cv-rate-label">Base + FSC</div>
+                    <div class="cv-rate">${formatCurrency(r.baseAndFsc)}</div>
+                </div>`;
+        });
+        html += '</div>';
+
+        // Accessorial Selection Grid
+        html += '<div class="compare-acc-section">';
+        html += '<h3>Select Accessorial Charges</h3>';
+
+        // The standard fee keys and labels (reusing the same structure from the modal)
+        const compareFeeLabels = {
+            prePull: 'Pre-Pull',
+            hazmatFee: 'HAZMAT / DG',
+            reeferFee: 'Reefer Fee',
+            chassisFee: 'Chassis Fee',
+            chassisSplitFee: 'Chassis Split',
+            triaxleFee: 'Triaxle Fee',
+            overweightFee: 'Overweight',
+            dryRunFee: 'Dry Run',
+            stopOffFee: 'Stop Off',
+            dropPickFee: 'Drop & Pick',
+            layoverFee: 'Layover',
+            bondedFee: 'Bonded',
+            residentialDeliveryFee: 'Residential Delivery',
+        };
+
+        const freeTimeLabels = {
+            warehouseWaitFee: 'Warehouse Wait Fee',
+            yardStorageCost: 'Yard Storage Cost',
+        };
+
+        // Vendor column short names (truncated for table header)
+        const vendorShortNames = compareList.map(r => {
+            const name = r.supplier;
+            return name.length > 18 ? name.substring(0, 16) + '...' : name;
+        });
+
+        html += '<table class="compare-acc-table">';
+        html += '<thead><tr><th style="width:30px;"></th><th>Charge</th>';
+        vendorShortNames.forEach((name, i) => {
+            html += `<th class="vendor-col-header" title="${compareList[i].supplier}">${name}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+
+        // Free Time / Storage section
+        html += `<tr class="section-label"><td colspan="${2 + compareList.length}">Storage & Wait Fees</td></tr>`;
+        Object.entries(freeTimeLabels).forEach(([key, label]) => {
+            html += buildFeeRow(key, label, vendorAccData);
+        });
+
+        // Main Fees section
+        html += `<tr class="section-label"><td colspan="${2 + compareList.length}">Accessorial Fees</td></tr>`;
+        Object.entries(compareFeeLabels).forEach(([key, label]) => {
+            html += buildFeeRow(key, label, vendorAccData);
+        });
+
+        // Custom charge rows placeholder
+        html += `</tbody><tbody id="customChargeRows"></tbody>`;
+        html += '</table>';
+
+        // Add Custom Charge button
+        html += `<div class="compare-add-custom">
+            <button onclick="addCustomCharge()">+ Add Custom Charge</button>
+        </div>`;
+
+        html += '</div>'; // end compare-acc-section
+
+        // Totals Section
+        html += '<div class="compare-totals" id="compareTotals"></div>';
+
+        // Disclaimer
+        html += '<div class="compare-disclaimer"><strong>Note:</strong> Totals include only the accessorial charges you have selected above. Some fees may be per-day, per-hour, or conditional — review the original fee terms for accuracy.</div>';
+
+        body.innerHTML = html;
+
+        // Initial totals calc
+        recalcCompareTotals();
+    }
+
+    /**
+     * Build a single fee row for the comparison table.
+     */
+    function buildFeeRow(key, label, vendorAccData) {
+        let html = `<tr data-fee-key="${key}">`;
+        html += `<td><input type="checkbox" class="fee-cb" data-key="${key}" onchange="onFeeCheckChange(this)"></td>`;
+        html += `<td class="fee-label-cell">${label}</td>`;
+
+        compareList.forEach((r, i) => {
+            const acc = vendorAccData[i];
+            const feeVal = acc?.fees?.[key] ?? null;
+            const parsed = parseFeeAmount(feeVal);
+
+            html += '<td class="vendor-val-cell">';
+            if (parsed.numeric) {
+                html += `<span class="fee-amount" data-vendor="${i}" data-key="${key}" data-amount="${parsed.amount}">${formatCurrency(parsed.amount)}</span>`;
+            } else if (parsed.text) {
+                // Variable/text-based fee — show text + input for estimate
+                html += `<div class="fee-variable" title="${parsed.text}">${truncateText(parsed.text, 20)}</div>`;
+                html += `<input type="number" placeholder="Est. $" data-vendor="${i}" data-key="${key}" data-type="estimate"
+                    oninput="recalcCompareTotals()" step="0.01" min="0" title="Enter your estimate for: ${parsed.text}">`;
+            } else {
+                // No data
+                html += `<span class="fee-na">N/A</span>`;
+                html += `<input type="number" placeholder="Custom $" data-vendor="${i}" data-key="${key}" data-type="custom"
+                    oninput="recalcCompareTotals()" step="0.01" min="0" style="margin-top:2px;">`;
+            }
+            html += '</td>';
+        });
+
+        html += '</tr>';
+        return html;
+    }
+
+    function truncateText(text, maxLen) {
+        if (text.length <= maxLen) return text;
+        return text.substring(0, maxLen - 1) + '...';
+    }
+
+    function onFeeCheckChange(cb) {
+        const row = cb.closest('tr');
+        if (cb.checked) {
+            row.classList.add('checked-row');
+        } else {
+            row.classList.remove('checked-row');
+        }
+        recalcCompareTotals();
+    }
+
+    function addCustomCharge() {
+        const tbody = document.getElementById('customChargeRows');
+        if (!tbody) return;
+
+        customChargeCounter++;
+        const customKey = `custom_${customChargeCounter}`;
+
+        let html = `<tr data-fee-key="${customKey}" class="checked-row">`;
+        html += `<td><input type="checkbox" class="fee-cb" data-key="${customKey}" checked onchange="onFeeCheckChange(this)"></td>`;
+        html += `<td class="fee-label-cell"><input type="text" class="custom-label-input" placeholder="Charge name..." data-custom-label="${customKey}"></td>`;
+
+        compareList.forEach((r, i) => {
+            html += `<td class="vendor-val-cell">
+                <input type="number" placeholder="$" data-vendor="${i}" data-key="${customKey}" data-type="custom"
+                    oninput="recalcCompareTotals()" step="0.01" min="0">
+            </td>`;
+        });
+
+        html += '</tr>';
+        tbody.insertAdjacentHTML('beforeend', html);
+        recalcCompareTotals();
+    }
+
+    /**
+     * Recalculate and render the totals for all compared vendors.
+     */
+    function recalcCompareTotals() {
+        const totalsDiv = document.getElementById('compareTotals');
+        if (!totalsDiv || compareList.length === 0) return;
+
+        // Get all checked fee keys
+        const checkedBoxes = document.querySelectorAll('.compare-acc-table .fee-cb:checked, #customChargeRows .fee-cb:checked');
+        const checkedKeys = new Set();
+        checkedBoxes.forEach(cb => checkedKeys.add(cb.dataset.key));
+
+        // Calculate per-vendor totals
+        const vendorTotals = compareList.map((r, i) => {
+            let accTotal = 0;
+            let hasEstimates = false;
+
+            checkedKeys.forEach(key => {
+                // First check for a fixed amount span
+                const amountSpan = document.querySelector(`.compare-acc-table span.fee-amount[data-vendor="${i}"][data-key="${key}"], #customChargeRows span.fee-amount[data-vendor="${i}"][data-key="${key}"]`);
+                if (amountSpan) {
+                    accTotal += parseFloat(amountSpan.dataset.amount) || 0;
+                    return;
+                }
+
+                // Then check for user-entered estimate/custom input
+                const input = document.querySelector(`.compare-acc-table input[type="number"][data-vendor="${i}"][data-key="${key}"], #customChargeRows input[type="number"][data-vendor="${i}"][data-key="${key}"]`);
+                if (input && input.value) {
+                    accTotal += parseFloat(input.value) || 0;
+                    hasEstimates = true;
+                }
+            });
+
+            return {
+                vendor: r.supplier,
+                baseFsc: r.baseAndFsc,
+                accTotal: accTotal,
+                allIn: r.baseAndFsc + accTotal,
+                hasEstimates: hasEstimates
+            };
+        });
+
+        // Find best and worst
+        const allInValues = vendorTotals.map(v => v.allIn);
+        const minTotal = Math.min(...allInValues);
+        const maxTotal = Math.max(...allInValues);
+
+        let html = '<h3>All-In Comparison</h3>';
+        html += '<div class="compare-totals-grid">';
+
+        vendorTotals.forEach((vt, i) => {
+            const isBest = vendorTotals.length > 1 && vt.allIn === minTotal;
+            const isWorst = vendorTotals.length > 1 && vt.allIn === maxTotal && minTotal !== maxTotal;
+            const diff = vt.allIn - minTotal;
+
+            let cardClass = 'compare-total-card';
+            if (isBest) cardClass += ' best';
+            if (isWorst) cardClass += ' worst';
+
+            html += `<div class="${cardClass}">
+                <div class="ct-vendor">${truncateText(vt.vendor, 22)}</div>
+                <div class="ct-base">Base+FSC: ${formatCurrency(vt.baseFsc)}</div>
+                <div class="ct-acc">Accessorials: ${formatCurrency(vt.accTotal)}${vt.hasEstimates ? '*' : ''}</div>
+                <div class="ct-total">${formatCurrency(vt.allIn)}</div>
+                ${isBest ? '<div class="ct-diff">Lowest</div>' : ''}
+                ${isWorst ? `<div class="ct-diff">+${formatCurrency(diff)} vs lowest</div>` : ''}
+                ${!isBest && !isWorst && vendorTotals.length > 1 ? `<div class="ct-diff">+${formatCurrency(diff)}</div>` : ''}
+            </div>`;
+        });
+
+        html += '</div>';
+
+        totalsDiv.innerHTML = html;
+    }
+
+    // Close compare panel on Escape
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && document.getElementById('comparePanel').classList.contains('active')) {
+            closeComparePanel();
+        }
+    });
 
     /* ================================================================
        INIT
